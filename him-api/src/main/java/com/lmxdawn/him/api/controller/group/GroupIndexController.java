@@ -104,7 +104,7 @@ public class GroupIndexController {
 
         String avatar = groupSaveReqVO.getAvatar();
         
-        avatar = avatar == null || "".equals(avatar) ? "http://prbsvykmy.bkt.clouddn.com/static/image/group-default.png" : avatar;
+        avatar = avatar == null || "".equals(avatar) ? "http://47.100.212.206/avatar/defaultgroup.jpg" : avatar;
         
         Group group = new Group();
         group.setUid(uid);
@@ -113,7 +113,7 @@ public class GroupIndexController {
         group.setMemberNum(1);
     
         String remark = groupSaveReqVO.getRemark();
-        remark = remark == null || "".equals(remark) ? "你今生有没有坚定不移地相信过一件事或一个人？是那种至死不渝的相信？" : remark;
+        remark = remark == null || "".equals(remark) ? "90部落" : remark;
         group.setRemark(remark);
         boolean b = groupService.insertGroup(group);
 

@@ -1,5 +1,6 @@
 package com.lmxdawn.him.api.ws;
 
+import com.alibaba.fastjson.JSON;
 import com.lmxdawn.him.api.vo.req.WSMessageReqVO;
 import com.lmxdawn.him.api.vo.req.WSBaseReqVO;
 import com.lmxdawn.him.api.vo.req.WSUserReqVO;
@@ -26,6 +27,16 @@ public class WSServer {
     @Value("${ws.port}")
     private int wsPort;
 
+    //NioEventLoopGroup 相当于时间循环组  这个组里面包括多个NioEventLoop
+    //NioEventLoop包含1个selector 和1个事件循环线程
+    //每个boss NioEventLoop循环执行的任务包含3步：
+    //第1步：轮询accept事件；
+    //第2步：处理io任务，即accept事件，与client建立连接，生成NioSocketChannel，并将NioSocketChannel注册到某个worker NioEventLoop的selector上；
+    //第3步：处理任务队列中的任务，runAllTasks。任务队列中的任务包括用户调用eventloop.execute或schedule执行的任务，或者其它线程提交到该eventloop的任务
+    //每个worker NioEventLoop循环执行的任务包含3步：
+    //第1步：轮询read、write事件；
+    //第2步：处理io任务，即read、write事件，在NioSocketChannel可读、可写事件发生时进行处理；
+    //第3步：处理任务队列中的任务，runAllTasks
     private EventLoopGroup boss = new NioEventLoopGroup();
     private EventLoopGroup work = new NioEventLoopGroup();
 
@@ -40,11 +51,11 @@ public class WSServer {
 
         ServerBootstrap bootstrap = new ServerBootstrap()
                 .group(boss, work)
-                .channel(NioServerSocketChannel.class)
+                .channel(NioServerSocketChannel.class)//服务端的父通道
                 .localAddress(new InetSocketAddress(wsPort))
                 //保持长连接
-                .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childHandler(new WSServerInitializer());
+                .childOption(ChannelOption.SO_KEEPALIVE, true)//子通道保持长连接
+                .childHandler(new WSServerInitializer());//子通道的
 
         ChannelFuture future = bootstrap.bind().sync();
         if (future.isSuccess()) {
@@ -69,6 +80,7 @@ public class WSServer {
      * @return
      */
     public Boolean sendMsg(Long fromUid, WSBaseReqVO wsBaseReqVO) {
+        log.info("发送消息给用户，该用户id为：" + fromUid + "发送的消息是"+ JSON.toJSONString(wsBaseReqVO));
         Channel channel = WSSocketHolder.get(fromUid);
 
         if (null == channel) {

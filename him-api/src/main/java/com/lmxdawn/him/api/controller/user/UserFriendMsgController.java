@@ -85,7 +85,41 @@ public class UserFriendMsgController {
         return ResultVOUtils.success(userFriendMsgs);
         
     }
-    
+
+
+    /**
+     * 清空未读的消息数量
+     *
+     * @return
+     */
+    @PostMapping("/clearUnMsgCount")
+    public BaseResVO clearUnMsgCount(@Valid @RequestBody UserFriendMsgClearMsgCountReqVO msgCountReqVO,
+                                     BindingResult bindingResult,
+                                     HttpServletRequest request) {
+        if (bindingResult.hasErrors()) {
+            return ResultVOUtils.error(ResultEnum.PARAM_VERIFY_FALL, bindingResult.getFieldError().getDefaultMessage());
+        }
+
+        // 验证登录
+        UserLoginDTO userLoginDTO = UserLoginUtils.check(request);
+        if (userLoginDTO == null) {
+            return ResultVOUtils.error(ResultEnum.LOGIN_VERIFY_FALL);
+        }
+
+        Long uid = userLoginDTO.getUid();
+
+        Long receiverUid = msgCountReqVO.getReceiverUid();
+
+        // 更新最后一次的消息
+        UserFriend userFriend = new UserFriend();
+        userFriend.setUid(uid);
+        userFriend.setFriendUid(receiverUid);
+        userFriend.setUnMsgCount(0);
+        boolean b = userFriendService.updateUserFriend(userFriend);
+
+        return ResultVOUtils.success();
+    }
+
     /**
      * 发送消息
      *
@@ -98,23 +132,23 @@ public class UserFriendMsgController {
         if (bindingResult.hasErrors()) {
             return ResultVOUtils.error(ResultEnum.PARAM_VERIFY_FALL, bindingResult.getFieldError().getDefaultMessage());
         }
-        
+
         // 验证登录
         UserLoginDTO userLoginDTO = UserLoginUtils.check(request);
         if (userLoginDTO == null) {
             return ResultVOUtils.error(ResultEnum.LOGIN_VERIFY_FALL);
         }
-        
+
         Long uid = userLoginDTO.getUid();
-        
+
         Long receiverUid = userFriendMsgSaveReqVO.getReceiverUid();
-        
+
         // 判断是不是朋友
         UserFriend userFriend = userFriendService.findByUidAndFriendUid(uid, receiverUid);
         if (userFriend == null) {
             return ResultVOUtils.error(ResultEnum.PARAM_VERIFY_FALL, "该用户还不是你的好友~");
         }
-    
+
         Long senderUid = uid;
         // 追加消息
         UserFriendMsg userFriendMsg = new UserFriendMsg();
@@ -154,7 +188,7 @@ public class UserFriendMsgController {
         if (!b) {
             return ResultVOUtils.error();
         }
-        
+
         List<UserFriend> userFriends = new ArrayList<>();
         // 给接收者更新最后一次的消息
         UserFriend userFriend1 = new UserFriend();
@@ -174,7 +208,7 @@ public class UserFriendMsgController {
         userFriend2.setCreateTime(new Date());
         userFriend2.setModifiedTime(new Date());
         userFriends.add(userFriend2);
-        
+
         userFriendService.insertUserFriendAll(userFriends);
 
         // 发送在线消息
@@ -186,42 +220,8 @@ public class UserFriendMsgController {
         String remark = user.getRemark();
         WSBaseReqVO wsBaseReqVO = WSBaseReqUtils.create(WSResTypeConstant.FRIEND, receiverUid, msgType, msgContent, sUid, name, avatar, remark);
         wsServer.sendMsg(receiverUid, wsBaseReqVO);
-        
+
         return ResultVOUtils.success();
     }
-    
-    
-    /**
-     * 清空未读的消息数量
-     *
-     * @return
-     */
-    @PostMapping("/clearUnMsgCount")
-    public BaseResVO clearUnMsgCount(@Valid @RequestBody UserFriendMsgClearMsgCountReqVO msgCountReqVO,
-                                     BindingResult bindingResult,
-                                     HttpServletRequest request) {
-        if (bindingResult.hasErrors()) {
-            return ResultVOUtils.error(ResultEnum.PARAM_VERIFY_FALL, bindingResult.getFieldError().getDefaultMessage());
-        }
-        
-        // 验证登录
-        UserLoginDTO userLoginDTO = UserLoginUtils.check(request);
-        if (userLoginDTO == null) {
-            return ResultVOUtils.error(ResultEnum.LOGIN_VERIFY_FALL);
-        }
-        
-        Long uid = userLoginDTO.getUid();
-        
-        Long receiverUid = msgCountReqVO.getReceiverUid();
-        
-        // 更新最后一次的消息
-        UserFriend userFriend = new UserFriend();
-        userFriend.setUid(uid);
-        userFriend.setFriendUid(receiverUid);
-        userFriend.setUnMsgCount(0);
-        boolean b = userFriendService.updateUserFriend(userFriend);
-        
-        return ResultVOUtils.success();
-    }
-    
+
 }

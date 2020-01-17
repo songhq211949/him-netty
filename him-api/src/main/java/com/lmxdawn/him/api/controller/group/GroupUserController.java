@@ -97,7 +97,7 @@ public class GroupUserController {
      */
     @PostMapping("/create")
     public BaseResVO create(@RequestParam(value = "checkCode", required = false, defaultValue = "") String checkCode,
-                            @RequestParam(value = "groupId", required = false, defaultValue = "0L") Long groupId,
+                            @RequestParam(value = "groupId", required = false, defaultValue = "0") Long groupId,
                             HttpServletRequest request) {
         
         // 验证登录

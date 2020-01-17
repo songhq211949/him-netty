@@ -1,10 +1,13 @@
 package com.lmxdawn.him.api.service.other.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.lmxdawn.him.api.filter.RequestFilter;
 import com.lmxdawn.him.api.service.other.QqWebAuthService;
 import com.lmxdawn.him.api.utils.OkHttpUtil;
 import com.lmxdawn.him.api.vo.res.QqOpenIdResVO;
 import com.lmxdawn.him.api.vo.res.QqUserInfoResVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -13,8 +16,9 @@ import java.util.Map;
 
 @Service
 public class QqWebAuthServiceImpl implements QqWebAuthService {
-    
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(QqWebAuthServiceImpl.class);
+
     @Value("${qq.auth.appid}")
     private String appid;
     
@@ -63,6 +67,7 @@ public class QqWebAuthServiceImpl implements QqWebAuthService {
         map.put("openid", openID);
         String url = "https://graph.qq.com/user/get_user_info";
         String json = OkHttpUtil.get(url, map);
+        logger.info("qq用户返回的信息是：" + json);
         QqUserInfoResVO qqUserInfoResVO = JSON.parseObject(json, QqUserInfoResVO.class);
         if (null == qqUserInfoResVO.getRet() || qqUserInfoResVO.getRet() != 0) {
             return null;

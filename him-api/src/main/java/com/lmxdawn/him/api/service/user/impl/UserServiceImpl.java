@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
-    public User findPwdByUid(Long uid) {
+    public User findPwdByUid(String uid) {
         return userDao.findPwdByUid(uid);
     }
     

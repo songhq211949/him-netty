@@ -10,10 +10,11 @@ public interface UserService {
 
     User findByUid(Long uid);
 
-    User findPwdByUid(Long uid);
+    User findPwdByUid(String userName);
     
     Map<Long, UserInfoListResVO> listByUidIn(List<Long> uids);
 
+    //这个会返回对象中的uid
     boolean insertUser(User user);
 
     boolean updateUser(User user);

@@ -16,11 +16,11 @@ public interface UserDao {
     User findByUid(Long uid);
 
     /**
-     * 根据Uid查询密码
-     * @param uid
+     * 根据userName查询密码
+     * @param userName
      * @return
      */
-    User findPwdByUid(Long uid);
+    User findPwdByUid(String  userName);
 
     /**
      * 根据多个Uid查询

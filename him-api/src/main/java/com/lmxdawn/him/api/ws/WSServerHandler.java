@@ -1,5 +1,6 @@
 package com.lmxdawn.him.api.ws;
 
+import com.alibaba.fastjson.JSON;
 import com.lmxdawn.him.api.constant.WSResTypeConstant;
 import com.lmxdawn.him.api.constant.WSReqTypeConstant;
 import com.lmxdawn.him.api.utils.UserLoginUtils;
@@ -60,27 +61,27 @@ public class WSServerHandler extends SimpleChannelInboundHandler<WSBaseReqProtoO
     }
 
     /**
-     * 读到客户端的内容 （这里只做心跳检查）
+     * 读到客户端的内容  本应用客户端发送的消息没有channel写入，而发送http请求将要发送的内容，再有服务器分发推送给客户端
+     * 这里只做心跳检查
      * @param ctx
      * @param msg
      * @throws Exception
      */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, WSBaseReqProtoOuterClass.WSBaseReqProto msg) throws Exception {
-
         String sid = msg.getSid();
         long uid = msg.getUid();
         Integer type = msg.getType();
         switch (type) {
             case WSReqTypeConstant.LOGIN: // 登录类型
-                log.info("用户登录");
+                log.info("用户登录,用户id为:" + uid);
                 userLogin(ctx, uid, sid);
                 break;
             case WSReqTypeConstant.PING: // 心跳
-                log.info("客户端心跳");
+                log.info("客户端心跳,用户id为:" + uid);
                 break;
             default:
-                log.info("未知类型");
+                log.info("未知类型,用户id为:" + uid);
         }
 
     }
@@ -111,7 +112,7 @@ public class WSServerHandler extends SimpleChannelInboundHandler<WSBaseReqProtoO
         }
         
         // 加入 在线 map 中
-        WSSocketHolder.put(uid, ctx.channel());
+        WSSocketHolder.put(uid, ctx.channel()); 
     }
 
     @Override

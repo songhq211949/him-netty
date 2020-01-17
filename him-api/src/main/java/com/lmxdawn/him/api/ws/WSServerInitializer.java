@@ -29,6 +29,7 @@ public class WSServerInitializer extends ChannelInitializer<SocketChannel> {
 
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
+        //为每一个服务端到客户端的连接通道初始化
         ChannelPipeline pipeline = ch.pipeline();
         //15 秒客户端没有向服务器发送心跳则关闭连接
         pipeline.addLast(new IdleStateHandler(15, 0, 0));
@@ -75,7 +76,7 @@ public class WSServerInitializer extends ChannelInitializer<SocketChannel> {
         // 协议包解码时指定Protobuf字节数实例化为CommonProtocol类型
         pipeline.addLast(new ProtobufDecoder(WSBaseReqProtoOuterClass.WSBaseReqProto.getDefaultInstance()));
 
-        // websocket定义了传递数据的6中frame类型
+        // websocket定义了传递数据的6中frame类型，这个就是用户处理的handler
         pipeline.addLast(new WSServerHandler());
 
     }

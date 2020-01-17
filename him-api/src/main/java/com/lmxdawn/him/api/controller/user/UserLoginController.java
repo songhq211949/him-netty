@@ -49,28 +49,30 @@ public class UserLoginController {
      * @return
      */
     @PostMapping("/byPwd")
-    public BaseResVO byPwd(@Valid @RequestBody UserLoginPwdReqVO userLoginPwdReqVO,
+    public BaseResVO byPwd(UserLoginPwdReqVO userLoginPwdReqVO,
                            BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResultVOUtils.error(ResultEnum.PARAM_VERIFY_FALL, bindingResult.getFieldError().getDefaultMessage());
         }
         
-        Long uid = userLoginPwdReqVO.getUid();
-        User user = userService.findPwdByUid(uid);
-        String md5Pwd = PasswordUtils.md52md5(userLoginPwdReqVO.getPwd());
+        String userName = userLoginPwdReqVO.getUserName();
+        User user = userService.findPwdByUid(userName);
+        //String md5Pwd = PasswordUtils.md52md5(userLoginPwdReqVO.getPassword());
+        //暂时不对密码做MD5加密处理
+        String md5Pwd = userLoginPwdReqVO.getPassword();
         if (user == null || !md5Pwd.equals(user.getPwd())) {
             return ResultVOUtils.error(ResultEnum.PARAM_VERIFY_FALL, "密码或用户名错误~");
         }
-        String token = UserLoginUtils.createSid(uid);
+        String token = UserLoginUtils.createSid(user.getUid());
         
         UserLoginResVO userLoginResVO = new UserLoginResVO();
-        userLoginResVO.setUid(uid);
+        userLoginResVO.setUid(user.getUid());
         userLoginResVO.setSid(token);
         return ResultVOUtils.success(userLoginResVO);
     }
     
     /**
-     * 用户密码登录
+     * 游客登录
      *
      * @return
      */
@@ -83,9 +85,9 @@ public class UserLoginController {
         char[] chr = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A',
                 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
                 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
-        String name = "火星人" + RandomStringUtils.random(7, chr);
-        String avatar = String.format("http://prbsvykmy.bkt.clouddn.com/static/image/user-%d-default.png", type);
-        String remark = "你今生有没有坚定不移地相信过一件事或一个人？是那种至死不渝的相信？";
+        String name = "有缘人" + RandomStringUtils.random(7, chr);
+        String avatar = String.format("http://47.100.212.206/avatar/%d.jpg", type);
+        String remark = "念念不忘";
         // 创建用户
         User user = new User();
         user.setName(name);
@@ -114,16 +116,18 @@ public class UserLoginController {
     public BaseResVO byQq(@RequestParam(value = "code") String code,
                           @RequestParam(value = "redirect_uri") String redirect_uri) {
     
-    
+        //code为qq第三方登入后获取的Authorization code ,redirect_uri为跳转时的uri
+        //accessToken即为我们后端取到的token
         String accessToken = qqWebAuthService.getAccessToken(code, redirect_uri);
         if (accessToken == null || "".equals(accessToken)) {
             return ResultVOUtils.error(ResultEnum.PARAM_VERIFY_FALL, "accessToken 获取失败~");
         }
-    
+        //获取openid,这个openIdResVO里面包含openid,这个openid与用户QQ号一一对应，不会改变
         QqOpenIdResVO openIdResVO = qqWebAuthService.getOpenID(accessToken);
         if (openIdResVO == null || openIdResVO.getOpenid() == null || "".equals(openIdResVO.getOpenid())) {
-            return ResultVOUtils.error(ResultEnum.PARAM_VERIFY_FALL, "openid 获取是吧~");
+            return ResultVOUtils.error(ResultEnum.PARAM_VERIFY_FALL, "openid 获取失败~");
         }
+        //获取用户信息 根据openId和accessToken 获取用户信息
         QqUserInfoResVO userInfo = qqWebAuthService.getUserInfo(accessToken, openIdResVO.getOpenid());
         
         if (userInfo == null) {
@@ -136,9 +140,16 @@ public class UserLoginController {
         if (userQq == null || userQq.getUid() == null) {
             // 创建用户
             User user = new User();
-            user.setName(userInfo.getNickname());
-            user.setAvatar(userInfo.getFigureurl());
-            String remark = "你今生有没有坚定不移地相信过一件事或一个人？是那种至死不渝的相信？";
+            String nickname = userInfo.getNickname();
+            user.setName(nickname);
+            user.setAvatar(userInfo.getFigureurl_qq_2());
+            //判断是否是她
+            String remark =null;
+            if("☆".equals(nickname)){
+                remark = "但凡未得到,但凡是过去,总是最登对!";
+            }else {
+                remark = "历尽千帆归来仍是少年";
+            }
             user.setRemark(remark);
             boolean b = userService.insertUser(user);
             if (!b) {
@@ -155,7 +166,8 @@ public class UserLoginController {
         }
     
         Long uid = userQq.getUid();
-        
+
+        //使用jwt加密用户信息
         String sid = UserLoginUtils.createSid(uid);
         
         UserLoginResVO userLoginResVO = new UserLoginResVO();

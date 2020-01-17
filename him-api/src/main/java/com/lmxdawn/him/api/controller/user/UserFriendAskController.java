@@ -89,10 +89,19 @@ public class UserFriendAskController {
     
   }
   
-  
+  /**
+   * @description 用于扫描二维码添加好友请求
+   * @author songhaiqiang
+   * @date 2020/1/16 16:51
+   * @param checkCode
+   * @param friendUid
+   * @param remark
+   * @param request
+   * @return com.lmxdawn.him.common.vo.res.BaseResVO
+   */
   @PostMapping("/create")
   public BaseResVO create(@RequestParam(value = "checkCode", required = false, defaultValue = "") String checkCode,
-                          @RequestParam(value = "friendUid", required = false, defaultValue = "0L") Long friendUid,
+                          @RequestParam(value = "friendUid", required = false, defaultValue = "0") Long friendUid,
                           @RequestParam(value = "remark", required = false, defaultValue = "") String remark,
                           HttpServletRequest request) {
     // 验证登录

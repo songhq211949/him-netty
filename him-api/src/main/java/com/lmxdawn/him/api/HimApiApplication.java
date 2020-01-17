@@ -13,4 +13,14 @@ public class HimApiApplication {
     }
 
 }
+/**
+ * 1.选择女游客登入
+ * 会依次请求
+ * /api/user/login/byTourist
+ * /api/user/loginInfo
+ * 会打印用户登入   用户登入即建立长连接
+ * /api/user/friend/lists
+ * /api/group/user/lists
+ *
+ */
 

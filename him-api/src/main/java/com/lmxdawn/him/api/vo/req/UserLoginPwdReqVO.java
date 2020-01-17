@@ -14,13 +14,13 @@ import javax.validation.constraints.NotNull;
 @Data
 public class UserLoginPwdReqVO extends BaseReqVO {
     
-    @NotNull(message = "用户ID不能为空")
-    private Long uid;
+    @NotNull(message = "用户不能为空")
+    private String userName;
     
     /**
      * 密码
      */
     @NotEmpty(message = "密码不能为空")
-    private String pwd;
+    private String password;
     
 }
