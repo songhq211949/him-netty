@@ -1,6 +1,7 @@
 package com.lmxdawn.him.api.utils;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Map;
 
 import okhttp3.*;
@@ -130,5 +131,9 @@ public class OkHttpUtil {
                 .post(requestBody)
                 .build();
         return execNewCall(request);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(new Date().toString());
     }
 }

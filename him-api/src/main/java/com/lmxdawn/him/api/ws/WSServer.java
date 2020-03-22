@@ -52,7 +52,7 @@ public class WSServer {
         ServerBootstrap bootstrap = new ServerBootstrap()
                 .group(boss, work)
                 .channel(NioServerSocketChannel.class)//服务端的父通道
-                .localAddress(new InetSocketAddress(wsPort))
+                .localAddress(new InetSocketAddress(wsPort))//监听端口
                 //保持长连接
                 .childOption(ChannelOption.SO_KEEPALIVE, true)//子通道保持长连接
                 .childHandler(new WSServerInitializer());//子通道的

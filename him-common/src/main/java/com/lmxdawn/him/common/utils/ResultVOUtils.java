@@ -24,6 +24,12 @@ public class ResultVOUtils {
         return baseResVO;
     }
 
+    public static BaseResVO noLogin() {
+        BaseResVO<Object> baseResVO = new BaseResVO<>();
+        baseResVO.setCode(1);
+        return baseResVO;
+    }
+
     /**
      * 成功时返回
      * @return {@link BaseResVO}
